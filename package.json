@@ -1,0 +1,32 @@
+{
+  "name": "sfinder-strict-minimal",
+  "version": "0.0.0",
+  "description": "A post processing tool that generates the minimal PC solutions to cover all patterns",
+  "keywords": [
+    "tetris",
+    "solution-finder"
+  ],
+  "main": "index.js",
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "test": "eslint \"**/*.js\" --cache && c8 --reporter=lcov mocha",
+    "preversion": "npm test",
+    "postversion": "git push --follow-tags && npm publish"
+  },
+  "repository": "eight04/sfinder-strict-minimal",
+  "author": "eight04 <eight04@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "c8": "^7.1.2",
+    "eslint": "^7.1.0",
+    "mocha": "^7.2.0"
+  },
+  "dependencies": {
+    "csv-parse": "^4.10.1"
+  },
+  "bin": {
+    "sfinder-minimal": "./cli.js"
+  }
+}
