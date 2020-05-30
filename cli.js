@@ -24,6 +24,36 @@ function main() {
   
   console.log(`You must learn ${count} solutions to cover all patterns. There are ${sets.length} combinations of solutions to cover all patterns.`);
   
+  // make sure there is no duplicate set?
+  // for (let i = 0; i < sets.length; i++) {
+    // for (let j = i + 1; j < sets.length; j++) {
+      // const s = new Set((function* () {
+        // yield* sets[i];
+        // yield* sets[j];
+      // })());
+      // if (s.length === 50) {
+        // throw new Error(`Duplicate set [${i}] [${j}]`);
+      // }
+    // }
+  // }
+  
+  // try to find cmmon set?
+  const firstSet = sets[0];
+  const commonNodes = [];
+  for (const node of firstSet) {
+    let inOther = true;
+    for (const otherSet of sets.slice(1)) {
+      if (!otherSet.includes(node)) {
+        inOther = false;
+        break;
+      }
+    }
+    if (inOther) {
+      commonNodes.push(node);
+    }
+  }
+  console.log(`${commonNodes.length} common solutions`);
+  
   const solutionMap = new Map();
   for (const pattern of patterns) {
     for (const fumen of pattern.fumens) {

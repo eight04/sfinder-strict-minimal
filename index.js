@@ -95,6 +95,9 @@ function findMinimalNodes(edges) {
     }
     
     for (const node of edge.nodes) {
+      node.color++;
+      if (node.color > 1) continue; // the node has been tried by other edges
+      
       currentNodes.push(node);
       for (const siblingEdge of node.edges) {
         siblingEdge.color++;
@@ -104,6 +107,9 @@ function findMinimalNodes(edges) {
       for (const siblingEdge of node.edges) {
         siblingEdge.color--;
       }
+    }
+    for (const node of edge.nodes) {
+      node.color--;
     }
   }
 }
@@ -135,6 +141,7 @@ function createFumenStore() {
     const node = {
       key: fumen,
       edges: new Set,
+      color: 0,
       groupId: 0
     };
     fumenMap.set(fumen, node);
