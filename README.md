@@ -19,7 +19,7 @@ Usage
 
 ```
 sfinder path -f csv -k pattern
-sfinder-minimal < sfinder/output/path.csv
+sfinder-minimal < output/path.csv
 ```
 
 This tool will generate some markdown files named `path_minimal_strict_*.md` inside the current folder.
