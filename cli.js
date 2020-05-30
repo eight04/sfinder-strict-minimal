@@ -16,9 +16,19 @@ sets.forEach((set, i) => {
 ${set.length} minimal solutions  
 Success rate: ${(100 * successPatterns.length / patterns.length).toFixed(2)}% (${successPatterns.length} / ${patterns.length})
 
+### Summary
+
+${set.map(solutionToImage).join(" ")}
+
+### Details
+
 ${set.map(solutionToMarkdown).join("\n")}
 `);
 });
+
+function solutionToImage(sol) {
+  return `[${fumenImage(sol.fumen)}](${fumenLink(sol.fumen)})`;
+}
 
 function solutionToMarkdown(sol) {
   return `
