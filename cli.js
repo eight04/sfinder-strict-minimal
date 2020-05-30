@@ -7,21 +7,6 @@ const {csvToPatterns, patternsToGraph, findMinimalNodes} = require(".");
 
 main();
 
-// sets.forEach((set, i) => {
-  // fs.writeFileSync(`path_minimal_strict_${i}.md`, `
-// ${set.length} minimal solutions  
-// Success rate: ${(100 * successPatterns.length / patterns.length).toFixed(2)}% (${successPatterns.length} / ${patterns.length})
-
-// ### Summary
-
-// ${set.map(solutionToImage).join(" ")}
-
-// ### Details
-
-// ${set.map(solutionToMarkdown).join("\n")}
-// `);
-// });
-
 function main() {
   const data = fs.readFileSync(0, "utf8");
   
@@ -38,17 +23,48 @@ function main() {
   console.log(`Finished in ${(Date.now() - startTime) / 1000}s`);
   
   console.log(`You must learn ${count} solutions to cover all patterns. There are ${sets.length} combinations of solutions to cover all patterns.`);
+  
+  const solutionMap = new Map();
+  for (const pattern of patterns) {
+    for (const fumen of pattern.fumens) {
+      let sol = solutionMap.get(fumen);
+      if (!sol) {
+        sol = {
+          fumen,
+          patterns: []
+        };
+        solutionMap.set(fumen, sol);
+      }
+      sol.patterns.push(pattern.pattern);
+    }
+  }
+  
+  const solutions = sets[0].map(n => solutionMap.get(n.key));
+  solutions.sort((a, b) => b.patterns.length - a.patterns.length);
+  
+  fs.writeFileSync("path_minimal_strict.md", `
+${solutions.length} minimal solutions  
+Success rate: ${(100 * successPatterns.length / patterns.length).toFixed(2)}% (${successPatterns.length} / ${patterns.length})
+
+### Summary
+
+${solutions.map(solutionToImage).join(" ")}
+
+### Details
+
+${solutions.map(s => solutionToMarkdown(s, successPatterns.length)).join("\n")}
+`);
 }
 
 function solutionToImage(sol) {
   return `[${fumenImage(sol.fumen)}](${fumenLink(sol.fumen)})`;
 }
 
-function solutionToMarkdown(sol) {
+function solutionToMarkdown(sol, allPatternCount) {
   return `
 [${fumenImage(sol.fumen)}](${fumenLink(sol.fumen)})
 
-${sol.patterns.size} patterns (${(100 * sol.patterns.size / successPatterns.length).toFixed(2)}%)
+${sol.patterns.length} patterns (${(100 * sol.patterns.length / allPatternCount).toFixed(2)}%)
 
 \`\`\`
 ${[...sol.patterns].join(",")}
@@ -62,8 +78,4 @@ function fumenImage(fumen) {
 
 function fumenLink(fumen) {
   return `https://harddrop.com/fumen/?${fumen}`;
-}
-
-function parseCSV(data) {
-  return 
 }
