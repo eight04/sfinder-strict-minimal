@@ -1,7 +1,7 @@
 const parse = require("csv-parse/lib/sync");
 
-function parseCSVToSolutions(data) {
-  const patterns = parse(data, {
+function csvToPatterns(data) {
+  return parse(data, {
     cast: (value, {index}) => {
       if (index === 1) {
         return Number(value);
@@ -19,111 +19,131 @@ function parseCSVToSolutions(data) {
       "pattern", "solutionCount", "solutions", "unusedMinos", "fumens"
     ]
   });
+}
+
+function patternsToGraph(patterns) {
+  const fumenStore = createFumenStore();
+  const edges = patterns.map(p => ({
+    nodes: new Set(p.fumens.map(fumenStore.fumenToNode)),
+    color: 0,
+    groupId: 0
+  }));
+  for (const edge of edges) {
+    for (const node of edge.nodes) {
+      node.edges.add(edge);
+    }
+  }
+  edges.sort((a, b) => a.nodes.size - b.nodes.size);
   
-  const successPatterns = patterns.filter(p => p.solutionCount);
-  
-  // collect all solutions
-  const solutions = new Map;
-  for (const pattern of patterns) {
-    for (const fumen of pattern.fumens) {
-      let sol = solutions.get(fumen);
-      if (!sol) {
-        sol = {
-          fumen,
-          patterns: new Set
-        };
-        solutions.set(fumen, sol);
-      }
+  for (const edge of edges) {
+    if (edge.redundant) continue;
+    
+    for (const siblingEdge of setFirst(edge.nodes).edges) {
+      if (edge === siblingEdge) continue;
       
-      sol.patterns.add(pattern.pattern);
+      if (setContain(siblingEdge.nodes, edge.nodes)) {
+        siblingEdge.redundant = true;
+      }
     }
   }
   
-  const solutionArray = Array.from(solutions.values()).sort((a, b) => b.patterns.size - a.patterns.size);
+  const cleanEdges = edges.filter(e => !e.redundant);
+  const nodes = [...fumenStore.getNodes()];
+  for (const node of nodes) {
+    for (const edge of node.edges) {
+      if (edge.redundant) {
+        node.edges.delete(edge);
+      }
+    }
+  }
   
   return {
-    patterns,
-    successPatterns,
-    solutions: solutionArray
+    edges: cleanEdges,
+    nodes
   };
 }
 
-function findMinimalCombination(solutions) {
-  const state = {
-    solutionArray: solutions,
-    resultArray: [],
-    solutionCount: 0,
-    coveredPatterns: new Set,
-    finalSets: [],
-    finalCount: solutions.length + 1
-  };
-  
-  digest(state, 0);
-  
+function findMinimalNodes(edges) {
+  let currentNodes = [];
+  let resultCount = Infinity;
+  const resultNodeSet = [];
+  digest(0);
   return {
-    count: state.finalCount,
-    sets: state.finalSets
+    count: resultCount,
+    sets: resultNodeSet
   };
-}
-
-function digest(state, index) {
-  if (index >= state.solutionArray.length) {
-    if (state.solutionCount > state.finalCount) {
+  
+  function digest(index) {
+    if (currentNodes.length > resultCount) {
       return;
     }
-    if (state.solutionCount < state.finalCount) {
-      state.finalCount = state.solutionCount;
-      state.finalSets = [state.resultArray.slice()];
+    
+    if (index >= edges.length) {
+      if (currentNodes.length < resultCount) {
+        resultCount = currentNodes.length;
+        resultNodeSet.length = 0;
+      }
+      resultNodeSet.push(currentNodes.slice());
       return;
     }
-    state.finalSets.push(state.resultArray.slice());
-    return;
-  }
-  
-  const sol = state.solutionArray[index];
-  const newPatterns = []; // patterns that will be covered if we use this solution
-  for (const pattern of sol.patterns) {
-    if (state.coveredPatterns.has(pattern)) {
-      continue;
+    
+    const edge = edges[index];
+    
+    if (edge.color) {
+      digest(index + 1);
+      return;
     }
-    newPatterns.push(pattern);
-  }
-  
-  if (!newPatterns.length) {
-    digest(state, index + 1);
-    return;
-  }
-  
-  if (newPatterns.every(p => insideSolution(p, state.solutionArray, index + 1))) {
-    // try not to use this solution
-    digest(state, index + 1);
-  }
-  
-  // use this solution
-  state.resultArray.push(sol);
-  state.solutionCount++;
-  for (const pattern of newPatterns) {
-    state.coveredPatterns.add(pattern);
-  }
-  digest(state, index + 1);
-  // revert
-  state.resultArray.pop();
-  state.solutionCount--;
-  for (const pattern of newPatterns) {
-    state.coveredPatterns.delete(pattern);
+    
+    for (const node of edge.nodes) {
+      currentNodes.push(node);
+      for (const siblingEdge of node.edges) {
+        siblingEdge.color++;
+      }
+      digest(index + 1);
+      currentNodes.pop();
+      for (const siblingEdge of node.edges) {
+        siblingEdge.color--;
+      }
+    }
   }
 }
 
-function insideSolution(pattern, solutions, index) {
-  for (let i = index; i < solutions.length; i++) {
-    if (solutions[i].patterns.has(pattern)) {
-      return true;
+function setContain(a, b) {
+  for (const item of b) {
+    if (!a.has(item)) {
+      return false;
     }
   }
-  return false;
+  return true;
+}
+
+function setFirst(s) {
+  return s.values().next().value;
+}
+
+function createFumenStore() {
+  const fumenMap = new Map;
+  return {
+    fumenToNode,
+    getNodes: () => fumenMap.values()
+  };
+  
+  function fumenToNode(fumen) {
+    if (fumenMap.has(fumen)) {
+      return fumenMap.get(fumen);
+    }
+    const node = {
+      key: fumen,
+      edges: new Set,
+      groupId: 0
+    };
+    fumenMap.set(fumen, node);
+    return node;
+  }
 }
 
 module.exports = {
-  parseCSVToSolutions,
-  findMinimalCombination
+  csvToPatterns,
+  patternsToGraph,
+  findMinimalNodes
 };

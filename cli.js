@@ -1,30 +1,44 @@
 #!/usr/bin/env node
 
+// eslint-disable no-console
+
 const fs = require("fs");
-const {parseCSVToSolutions, findMinimalCombination} = require(".");
+const {csvToPatterns, patternsToGraph, findMinimalNodes} = require(".");
 
-const data = fs.readFileSync(0, "utf8");
+main();
 
-const {patterns, successPatterns, solutions} = parseCSVToSolutions(data);
+// sets.forEach((set, i) => {
+  // fs.writeFileSync(`path_minimal_strict_${i}.md`, `
+// ${set.length} minimal solutions  
+// Success rate: ${(100 * successPatterns.length / patterns.length).toFixed(2)}% (${successPatterns.length} / ${patterns.length})
 
-const {count, sets} = findMinimalCombination(solutions);
+// ### Summary
 
-console.log(`You must learn ${count} solutions to cover all patterns. There are ${sets.length} combinations of solutions to cover all patterns.`); // eslint-disable-line no-console
+// ${set.map(solutionToImage).join(" ")}
+
+// ### Details
+
+// ${set.map(solutionToMarkdown).join("\n")}
+// `);
+// });
+
+function main() {
+  const data = fs.readFileSync(0, "utf8");
   
-sets.forEach((set, i) => {
-  fs.writeFileSync(`path_minimal_strict_${i}.md`, `
-${set.length} minimal solutions  
-Success rate: ${(100 * successPatterns.length / patterns.length).toFixed(2)}% (${successPatterns.length} / ${patterns.length})
-
-### Summary
-
-${set.map(solutionToImage).join(" ")}
-
-### Details
-
-${set.map(solutionToMarkdown).join("\n")}
-`);
-});
+  const startTime = Date.now();
+  
+  const patterns = csvToPatterns(data);
+  const successPatterns = patterns.filter(p => p.solutionCount);  
+  console.log(`${patterns.length} patterns, ${successPatterns.length} success`);
+  
+  const {edges, nodes} = patternsToGraph(successPatterns);
+  console.log(`${edges.length} edges, ${nodes.length} nodes`);
+  
+  const {count, sets} = findMinimalNodes(edges);
+  console.log(`Finished in ${(Date.now() - startTime) / 1000}s`);
+  
+  console.log(`You must learn ${count} solutions to cover all patterns. There are ${sets.length} combinations of solutions to cover all patterns.`);
+}
 
 function solutionToImage(sol) {
   return `[${fumenImage(sol.fumen)}](${fumenLink(sol.fumen)})`;
@@ -48,4 +62,8 @@ function fumenImage(fumen) {
 
 function fumenLink(fumen) {
   return `https://harddrop.com/fumen/?${fumen}`;
+}
+
+function parseCSV(data) {
+  return 
 }
