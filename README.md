@@ -7,6 +7,13 @@ sfinder-strict-minimal
 
 A post processing tool for solution-finder that generates the minimal PC solutions to cover all patterns.
 
+Installation
+------------
+
+```
+npm install -g sfinder-strict-minimal
+```
+
 Usage
 -----
 
@@ -15,9 +22,11 @@ sfinder path -f csv -k pattern
 sfinder-minimal < sfinder/output/path.csv
 ```
 
+This tool will generate some markdown files named `path_minimal_strict_*.md` inside the current folder.
+
 Changelog
 ---------
 
-* 0.1.0 (next)
+* 0.1.0 (May 30, 2020)
 
   - Initial release.
