@@ -1,7 +1,7 @@
 const parse = require("csv-parse/lib/sync");
 
 function csvToPatterns(data) {
-  return parse(data, {
+  const patterns = parse(data, {
     cast: (value, {index}) => {
       if (index === 1) {
         return Number(value);
@@ -19,6 +19,13 @@ function csvToPatterns(data) {
       "pattern", "solutionCount", "solutions", "unusedMinos", "fumens"
     ]
   });
+  
+  // https://github.com/knewjade/solution-finder/issues/3
+  const map = new Map;
+  for (const p of patterns) {
+    map.set(p.pattern, p);
+  }
+  return [...map.values()];
 }
 
 function patternsToGraph(patterns) {
@@ -26,7 +33,8 @@ function patternsToGraph(patterns) {
   const edges = patterns.map(p => ({
     nodes: new Set(p.fumens.map(fumenStore.fumenToNode)),
     color: 0,
-    groupId: 0
+    // visit: 0,
+    // groupId: 0
   }));
   for (const edge of edges) {
     for (const node of edge.nodes) {
@@ -57,6 +65,8 @@ function patternsToGraph(patterns) {
     }
   }
   
+  // nodes.sort((a, b) => b.edges.size - a.edges.size);
+  
   return {
     edges: cleanEdges,
     nodes
@@ -64,7 +74,7 @@ function patternsToGraph(patterns) {
 }
 
 function findMinimalNodes(edges) {
-  let currentNodes = [];
+  const currentNodes = [];
   let resultCount = Infinity;
   const resultNodeSet = [];
   digest(0);
@@ -114,6 +124,76 @@ function findMinimalNodes(edges) {
   }
 }
 
+/*
+function findMinimalNodes2(nodes) {
+  let currentNodes = [];
+  let resultCount = 50;
+  const resultNodeSet = [];
+  digest(0);
+  return {
+    count: resultCount,
+    sets: resultNodeSet
+  };
+  
+  function digest(index) {
+    if (currentNodes.length > resultCount) {
+      return;
+    }
+    
+    if (index >= nodes.length) {
+      if (currentNodes.length < resultCount) {
+        resultCount = currentNodes.length;
+        resultNodeSet.length = 0;
+      }
+      resultNodeSet.push(currentNodes.slice());
+      // if (!(resultNodeSet.length % 100)) {
+        // console.log(currentNodes.length, resultNodeSet.length);
+      // }
+      return;
+    }
+    
+    const node = nodes[index];
+    
+    // node.color++;
+    
+    let mustPick = false;
+    let allColored = true;
+    
+    for (const edge of node.edges) {
+      edge.visit++;
+      if (!edge.color) {
+        allColored = false;
+        if (edge.visit >= edge.nodes.size) {
+          mustPick = true;
+        }
+      }
+    }
+    
+    if (!allColored && currentNodes.length < resultCount) {
+      currentNodes.push(node);
+      for (const edge of node.edges) {
+        edge.color++;
+      }
+      digest(index + 1);
+      currentNodes.pop();
+      for (const edge of node.edges) {
+        edge.color--;
+      }
+    }
+    
+    if (!mustPick) {
+      digest(index + 1);
+    }
+    
+    for (const edge of node.edges) {
+      edge.visit--;
+    }
+    
+    // node.color--;
+  }
+}
+*/
+
 function setContain(a, b) {
   for (const item of b) {
     if (!a.has(item)) {
@@ -142,7 +222,8 @@ function createFumenStore() {
       key: fumen,
       edges: new Set,
       color: 0,
-      groupId: 0
+      // groupId: 0,
+      // pick: false
     };
     fumenMap.set(fumen, node);
     return node;
@@ -152,5 +233,6 @@ function createFumenStore() {
 module.exports = {
   csvToPatterns,
   patternsToGraph,
-  findMinimalNodes
+  findMinimalNodes,
+  // findMinimalNodes2
 };

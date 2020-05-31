@@ -20,39 +20,47 @@ function main() {
   console.log(`${edges.length} edges, ${nodes.length} nodes`);
   
   const {count, sets} = findMinimalNodes(edges);
+  // const {count, sets} = findMinimalNodes2(nodes);
   console.log(`Finished in ${(Date.now() - startTime) / 1000}s`);
   
   console.log(`You must learn ${count} solutions to cover all patterns. There are ${sets.length} combinations of solutions to cover all patterns.`);
   
   // make sure there is no duplicate set?
-  // for (let i = 0; i < sets.length; i++) {
-    // for (let j = i + 1; j < sets.length; j++) {
-      // const s = new Set((function* () {
-        // yield* sets[i];
-        // yield* sets[j];
-      // })());
-      // if (s.length === 50) {
-        // throw new Error(`Duplicate set [${i}] [${j}]`);
+  // const s = new Set;
+  // for (const set of sets) {
+    // const hash = hashNodes(set, nodes);
+    // if (s.has(hash)) {
+      // throw new Error("Duplicate set");
+    // }
+    // s.add(hash);
+  // }
+  
+  // function hashNodes(set, nodes) {
+    // const result = [];
+    // for (let i = 0; i < nodes.length; i++) {
+      // if (set.includes(nodes[i])) {
+        // result.push(i);
       // }
     // }
+    // return result.join(",");
   // }
   
   // try to find cmmon set?
-  const firstSet = sets[0];
-  const commonNodes = [];
-  for (const node of firstSet) {
-    let inOther = true;
-    for (const otherSet of sets.slice(1)) {
-      if (!otherSet.includes(node)) {
-        inOther = false;
-        break;
-      }
-    }
-    if (inOther) {
-      commonNodes.push(node);
-    }
-  }
-  console.log(`${commonNodes.length} common solutions`);
+  // const firstSet = sets[0];
+  // const commonNodes = [];
+  // for (const node of firstSet) {
+    // let inOther = true;
+    // for (const otherSet of sets.slice(1)) {
+      // if (!otherSet.includes(node)) {
+        // inOther = false;
+        // break;
+      // }
+    // }
+    // if (inOther) {
+      // commonNodes.push(node);
+    // }
+  // }
+  // console.log(`${commonNodes.length} common solutions`);
   
   const solutionMap = new Map();
   for (const pattern of patterns) {
@@ -68,6 +76,19 @@ function main() {
       sol.patterns.push(pattern.pattern);
     }
   }
+  
+  // make sure there are enough patterns?
+  // for (const nodes of sets) {
+    // const s = new Set;
+    // for (const node of nodes) {
+      // for (const pattern of solutionMap.get(node.key).patterns) {
+        // s.add(pattern);
+      // }
+    // }
+    // if (s.size !== successPatterns.length) {
+      // throw new Error("Some patterns are missing");
+    // }
+  // }
   
   const solutions = sets[0].map(n => solutionMap.get(n.key));
   solutions.sort((a, b) => b.patterns.length - a.patterns.length);
