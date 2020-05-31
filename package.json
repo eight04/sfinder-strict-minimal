@@ -25,6 +25,8 @@
   },
   "dependencies": {
     "csv-parse": "^4.10.1",
+    "enquirer": "^2.3.5",
+    "neodoc": "^2.0.2",
     "tetris-fumen": "^1.1.1"
   },
   "bin": {
