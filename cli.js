@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-// eslint-disable no-console
+/* eslint-disable no-console */
 
 const fs = require("fs");
 const {csvToPatterns, patternsToGraph, findMinimalNodes} = require(".");
@@ -20,47 +20,9 @@ function main() {
   console.log(`${edges.length} edges, ${nodes.length} nodes`);
   
   const {count, sets} = findMinimalNodes(edges);
-  // const {count, sets} = findMinimalNodes2(nodes);
   console.log(`Finished in ${(Date.now() - startTime) / 1000}s`);
   
   console.log(`You must learn ${count} solutions to cover all patterns. There are ${sets.length} combinations of solutions to cover all patterns.`);
-  
-  // make sure there is no duplicate set?
-  // const s = new Set;
-  // for (const set of sets) {
-    // const hash = hashNodes(set, nodes);
-    // if (s.has(hash)) {
-      // throw new Error("Duplicate set");
-    // }
-    // s.add(hash);
-  // }
-  
-  // function hashNodes(set, nodes) {
-    // const result = [];
-    // for (let i = 0; i < nodes.length; i++) {
-      // if (set.includes(nodes[i])) {
-        // result.push(i);
-      // }
-    // }
-    // return result.join(",");
-  // }
-  
-  // try to find cmmon set?
-  // const firstSet = sets[0];
-  // const commonNodes = [];
-  // for (const node of firstSet) {
-    // let inOther = true;
-    // for (const otherSet of sets.slice(1)) {
-      // if (!otherSet.includes(node)) {
-        // inOther = false;
-        // break;
-      // }
-    // }
-    // if (inOther) {
-      // commonNodes.push(node);
-    // }
-  // }
-  // console.log(`${commonNodes.length} common solutions`);
   
   const solutionMap = new Map();
   for (const pattern of patterns) {
@@ -77,25 +39,24 @@ function main() {
     }
   }
   
-  // make sure there are enough patterns?
-  // for (const nodes of sets) {
-    // const s = new Set;
-    // for (const node of nodes) {
-      // for (const pattern of solutionMap.get(node.key).patterns) {
-        // s.add(pattern);
-      // }
-    // }
-    // if (s.size !== successPatterns.length) {
-      // throw new Error("Some patterns are missing");
-    // }
-  // }
+  console.log("Output first 10 combinations");
   
-  const solutions = sets[0].map(n => solutionMap.get(n.key));
-  solutions.sort((a, b) => b.patterns.length - a.patterns.length);
-  
-  fs.writeFileSync("path_minimal_strict.md", `
+  sets.slice(0, 10).forEach((set, i) => {
+    const solutions = set.map(n => solutionMap.get(n.key));
+    solutions.sort((a, b) => b.patterns.length - a.patterns.length);
+    output({
+      filename: `path_minimal_strict_${i + 1}.md`,
+      solutions,
+      patternCount: patterns.length,
+      successCount: successPatterns.length
+    });
+  });
+}
+
+function output({filename, solutions, patternCount, successCount}) {
+  fs.writeFileSync(filename, `
 ${solutions.length} minimal solutions  
-Success rate: ${(100 * successPatterns.length / patterns.length).toFixed(2)}% (${successPatterns.length} / ${patterns.length})
+Success rate: ${(100 * successCount / patternCount).toFixed(2)}% (${successCount} / ${patternCount})
 
 ### Summary
 
@@ -103,7 +64,7 @@ ${solutions.map(solutionToImage).join(" ")}
 
 ### Details
 
-${solutions.map(s => solutionToMarkdown(s, successPatterns.length)).join("\n")}
+${solutions.map(s => solutionToMarkdown(s, successCount)).join("\n")}
 `);
 }
 
