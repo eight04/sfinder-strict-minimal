@@ -24,7 +24,8 @@
     "mocha": "^7.2.0"
   },
   "dependencies": {
-    "csv-parse": "^4.10.1"
+    "csv-parse": "^4.10.1",
+    "tetris-fumen": "^1.1.1"
   },
   "bin": {
     "sfinder-minimal": "./cli.js"

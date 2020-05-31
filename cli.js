@@ -3,6 +3,7 @@
 /* eslint-disable no-console */
 
 const fs = require("fs");
+const {decoder, encoder} = require("tetris-fumen");
 const {csvToPatterns, patternsToGraph, findMinimalNodes} = require(".");
 
 main();
@@ -76,7 +77,6 @@ function main() {
 }
 
 function output({filename, solutions, patternCount, successCount}) {
-  const alters = solutions.filter(s => s.alters.length);
   fs.writeFileSync(filename, `
 ${solutions.length} minimal solutions  
 Success rate: ${(100 * successCount / patternCount).toFixed(2)}% (${successCount} / ${patternCount})
@@ -85,32 +85,24 @@ Success rate: ${(100 * successCount / patternCount).toFixed(2)}% (${successCount
 
 ${solutions.map(solutionToImage).join(" ")}
 
-${alters.length ? `
-### Alters
-
-${alters.map(alterToMarkdown).join("\n\n")}
-` : ""}
-
 ### Details
 
 ${solutions.map(s => solutionToMarkdown(s, successCount)).join("\n")}
 `);
 }
 
-function alterToMarkdown(solution) {
-  return [
-    solutionToImage(solution),
-    ...solution.alters.map(solutionToImage)
-  ].join(" ");
+function solutionToImage(sol) {
+  const fumen = sol.alters.length ? fumenJoin([sol.fumen, ...sol.alters.map(a => a.fumen)]) : sol.fumen;
+  return `[${fumenImage(fumen)}](${fumenLink(fumen)})`;
 }
 
-function solutionToImage(sol) {
-  return `[${fumenImage(sol.fumen)}](${fumenLink(sol.fumen)})`;
+function fumenJoin(fumens) {
+  return encoder.encode(fumens.map(decoder.decode).flat());
 }
 
 function solutionToMarkdown(sol, allPatternCount) {
   return `
-[${fumenImage(sol.fumen)}](${fumenLink(sol.fumen)})
+${solutionToImage(sol)}
 
 ${sol.patterns.length} patterns (${(100 * sol.patterns.length / allPatternCount).toFixed(2)}%)
 
@@ -121,7 +113,7 @@ ${[...sol.patterns].join(",")}
 }
 
 function fumenImage(fumen) {
-  return `![fumen image](https://fumen-svg-server--eight041.repl.co/?data=${encodeURIComponent(fumen)})`;
+  return `![fumen image](https://fumen-svg-server--eight041.repl.co/?delay=1500&data=${encodeURIComponent(fumen)})`;
 }
 
 function fumenLink(fumen) {
