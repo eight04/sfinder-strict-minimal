@@ -9,12 +9,26 @@ main();
 
 function main() {
   const data = fs.readFileSync(0, "utf8");
+  let ignoreData;
+  try {
+    ignoreData = fs.readFileSync(".sfinder-minimal-ignore", "utf8");
+  } catch (err) {
+    // pass
+  }
+  const ignoreFumens = ignoreData ? new Set(ignoreData.split(/\n/).map(s => s.trim()).filter(Boolean).filter(s => s.startsWith("#"))) : null;
   
   const startTime = Date.now();
   
   const patterns = csvToPatterns(data);
-  const successPatterns = patterns.filter(p => p.solutionCount);  
+  const successPatterns = patterns.filter(p => p.solutionCount);
   console.log(`${patterns.length} patterns, ${successPatterns.length} success`);
+  
+  if (ignoreFumens) {
+    console.log(`Ignore ${ignoreFumens.size} fumens`);
+    for (const pattern of successPatterns) {
+      pattern.fumens = pattern.fumens.filter(f => !ignoreFumens.has(f));
+    }
+  }
   
   const {edges, nodes} = patternsToGraph(successPatterns);
   console.log(`${edges.length} edges, ${nodes.length} nodes`);
@@ -42,7 +56,15 @@ function main() {
   console.log("Output first 10 combinations");
   
   sets.slice(0, 10).forEach((set, i) => {
-    const solutions = set.map(n => solutionMap.get(n.key));
+    const solutions = set.map(n => {
+      const sol = solutionMap.get(n.key);
+      const alters = n.alter.map(n => solutionMap.get(n.key));
+      return {
+        fumen: sol.fumen,
+        patterns: sol.patterns,
+        alters
+      };
+    });
     solutions.sort((a, b) => b.patterns.length - a.patterns.length);
     output({
       filename: `path_minimal_strict_${i + 1}.md`,
@@ -54,6 +76,7 @@ function main() {
 }
 
 function output({filename, solutions, patternCount, successCount}) {
+  const alters = solutions.filter(s => s.alters.length);
   fs.writeFileSync(filename, `
 ${solutions.length} minimal solutions  
 Success rate: ${(100 * successCount / patternCount).toFixed(2)}% (${successCount} / ${patternCount})
@@ -62,10 +85,23 @@ Success rate: ${(100 * successCount / patternCount).toFixed(2)}% (${successCount
 
 ${solutions.map(solutionToImage).join(" ")}
 
+${alters.length ? `
+### Alters
+
+${alters.map(alterToMarkdown).join("\n\n")}
+` : ""}
+
 ### Details
 
 ${solutions.map(s => solutionToMarkdown(s, successCount)).join("\n")}
 `);
+}
+
+function alterToMarkdown(solution) {
+  return [
+    solutionToImage(solution),
+    ...solution.alters.map(solutionToImage)
+  ].join(" ");
 }
 
 function solutionToImage(sol) {

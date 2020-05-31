@@ -57,6 +57,7 @@ function patternsToGraph(patterns) {
   
   const cleanEdges = edges.filter(e => !e.redundant);
   const nodes = [...fumenStore.getNodes()];
+  
   for (const node of nodes) {
     for (const edge of node.edges) {
       if (edge.redundant) {
@@ -65,12 +66,47 @@ function patternsToGraph(patterns) {
     }
   }
   
-  // nodes.sort((a, b) => b.edges.size - a.edges.size);
+  const cleanNodes = nodes.filter(n => n.edges.size);
+  
+  cleanNodes.sort((a, b) => a.edges.size - b.edges.size);
+  
+  for (const node of cleanNodes) {
+    if (node.redundant) continue;
+    
+    for (const siblingNode of setFirst(node.edges).nodes) {
+      if (siblingNode === node) continue;
+      
+      if (setEqual(node.edges, siblingNode.edges)) {
+        siblingNode.redundant = true;
+        node.alter.push(siblingNode);
+      }
+    }
+  }
+  
+  for (const edge of cleanEdges) {
+    for (const node of edge.nodes) {
+      if (node.redundant) {
+        edge.nodes.delete(node);
+      }
+    }
+  }
   
   return {
     edges: cleanEdges,
-    nodes
+    nodes: cleanNodes.filter(n => !n.redundant)
   };
+}
+
+function setEqual(a, b) {
+  if (a.size !== b.size) {
+    return false;
+  }
+  for (const item of a) {
+    if (!b.has(item)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 function findMinimalNodes(edges) {
@@ -222,6 +258,7 @@ function createFumenStore() {
       key: fumen,
       edges: new Set,
       color: 0,
+      alter: []
       // groupId: 0,
       // pick: false
     };
