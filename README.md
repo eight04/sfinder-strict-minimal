@@ -26,7 +26,7 @@ sfinder-minimal output/path.csv
 
 This tool will generate a markdown file named `path_minimal_strict.md` inside the current folder.
 
-[A demo using O-based ikcco PC](demo.md)
+[A demo of PC opener](demo.md)
 
 Changelog
 ---------
