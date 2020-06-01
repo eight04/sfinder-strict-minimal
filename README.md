@@ -5,10 +5,12 @@ sfinder-strict-minimal
 [![codecov](https://codecov.io/gh/eight04/sfinder-strict-minimal/branch/master/graph/badge.svg)](https://codecov.io/gh/eight04/sfinder-strict-minimal)
 [![install size](https://packagephobia.now.sh/badge?p=sfinder-strict-minimal)](https://packagephobia.now.sh/result?p=sfinder-strict-minimal)
 
-A post processing tool for [solution-finder](https://github.com/knewjade/solution-finder/issues/2) that generates the minimal PC solutions to cover all patterns.
+An interactive post processing tool for [solution-finder](https://github.com/knewjade/solution-finder/issues/2) that generates the minimal PC solutions to cover all patterns.
 
-Installation
-------------
+![screenshot](https://i.imgur.com/0zWeZ1t.png)
+
+Install
+-------
 
 ```
 npm install -g sfinder-strict-minimal
@@ -19,10 +21,12 @@ Usage
 
 ```
 sfinder path -f csv -k pattern
-sfinder-minimal < output/path.csv
+sfinder-minimal output/path.csv
 ```
 
-This tool will generate some markdown files named `path_minimal_strict_*.md` inside the current folder.
+This tool will generate a markdown file named `path_minimal_strict.md` inside the current folder.
+
+[A demo using O-based ikcco PC](demo.md)
 
 Changelog
 ---------
