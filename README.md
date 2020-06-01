@@ -31,6 +31,12 @@ This tool will generate a markdown file named `path_minimal_strict.md` inside th
 Changelog
 ---------
 
+* 0.2.0 (Jun 1, 2020)
+
+  - **Breaking: cli is changed.**
+  - **Breaking: add interactive prompt to find the best set, now the tool only outputs one file.**
+  - Improve performance.
+
 * 0.1.0 (May 30, 2020)
 
   - Initial release.
