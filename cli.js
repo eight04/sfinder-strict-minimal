@@ -6,6 +6,7 @@ const fs = require("fs");
 
 const {decoder, encoder} = require("tetris-fumen");
 const neodoc = require("neodoc");
+const {createSVG} = require("fumen-svg");
 
 const {csvToPatterns, patternsToGraph, findMinimalNodes} = require(".");
 const {prompt} = require("./lib/fumen-prompt");
@@ -84,7 +85,7 @@ async function main(filename) {
   });
   solutions.sort((a, b) => b.patterns.length - a.patterns.length);
   output({
-    filename: "path_minimal_strict.md",
+    filename: "path_minimal_strict",
     solutions,
     patternCount: patterns.length,
     successCount: successPatterns.length
@@ -117,15 +118,15 @@ async function findBestSet(sets) {
 }
 
 function output({filename, solutions, patternCount, successCount}) {
-  fs.writeFileSync(filename, `
-${solutions.length} minimal solutions  
+  fs.writeFileSync(`${filename}.html`, `
+${solutions.length} minimal solutions<br>
 Success rate: ${(100 * successCount / patternCount).toFixed(2)}% (${successCount} / ${patternCount})
 
-### Summary
+<h3>Summary</h3>
 
 ${solutions.map(solutionToImage).join(" ")}
 
-### Details
+<h3>Details</h3>
 
 ${solutions.map(s => solutionToMarkdown(s, successCount)).join("\n")}
 `);
@@ -134,7 +135,8 @@ ${solutions.map(s => solutionToMarkdown(s, successCount)).join("\n")}
 
 function solutionToImage(sol) {
   const fumen = sol.alters.length ? fumenJoin([sol.fumen, ...sol.alters.map(a => a.fumen)]) : sol.fumen;
-  return `[${fumenImage(fumen)}](${fumenLink(fumen)})`;
+  return `<a href="${fumenLink(fumen)}">${fumenImage(fumen)}</a>`;
+  // return `[${fumenImage(fumen)}](${fumenLink(fumen)})`;
 }
 
 function fumenJoin(fumens) {
@@ -147,14 +149,15 @@ ${solutionToImage(sol)}
 
 ${sol.patterns.length} patterns (${(100 * sol.patterns.length / allPatternCount).toFixed(2)}%)
 
-\`\`\`
+<pre><code>
 ${[...sol.patterns].join(",")}
-\`\`\`
+</code></pre>
 `;
 }
 
 function fumenImage(fumen) {
-  return `![fumen image](https://fumen-svg-server--eight041.repl.co/?delay=1500&data=${encodeURIComponent(fumen)})`;
+  const svg = createSVG({data: fumen});
+  return `<img src="data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}">`;
 }
 
 function fumenLink(fumen) {
