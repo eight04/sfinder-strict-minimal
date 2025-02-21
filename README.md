@@ -30,6 +30,11 @@ This tool will generate a markdown file named `path_minimal_strict.md` inside th
 Changelog
 ---------
 
+* 0.3.0 (Feb 21, 2025)
+
+  - Change: update fumen-svg-server endpoint.
+  - Bump dependencies.
+
 * 0.2.0 (Jun 1, 2020)
 
   - **Breaking: cli is changed.**
