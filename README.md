@@ -1,10 +1,6 @@
 sfinder-strict-minimal
 ======================
 
-[![Build Status](https://travis-ci.com/eight04/sfinder-strict-minimal.svg?branch=master)](https://travis-ci.com/eight04/sfinder-strict-minimal)
-[![codecov](https://codecov.io/gh/eight04/sfinder-strict-minimal/branch/master/graph/badge.svg)](https://codecov.io/gh/eight04/sfinder-strict-minimal)
-[![install size](https://packagephobia.now.sh/badge?p=sfinder-strict-minimal)](https://packagephobia.now.sh/result?p=sfinder-strict-minimal)
-
 An interactive post processing tool for [solution-finder](https://github.com/knewjade/solution-finder/issues/2) that generates the minimal PC solutions to cover all patterns.
 
 ![screenshot](https://i.imgur.com/0zWeZ1t.png)

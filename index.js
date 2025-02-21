@@ -1,4 +1,4 @@
-const parse = require("csv-parse/lib/sync");
+const {parse} = require("csv-parse/sync");
 
 function csvToPatterns(data) {
   const patterns = parse(data, {
