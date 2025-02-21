@@ -15,8 +15,11 @@ npm install -g sfinder-strict-minimal
 Usage
 -----
 
+Using the classic PC opener for example:
+https://knewjade.github.io/fumen-for-mobile/#?d=v115@9gC8EeE8DeF8CeG8DeC8JeAgH
+
 ```
-sfinder path -f csv -k pattern
+sfinder path -f csv -k pattern -t v115@9gC8EeE8DeF8CeG8DeC8JeAgH --patterns I,*!
 sfinder-minimal output/path.csv
 ```
 
