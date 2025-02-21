@@ -10,6 +10,8 @@ const neodoc = require("neodoc");
 const {csvToPatterns, patternsToGraph, findMinimalNodes} = require(".");
 const {prompt} = require("./lib/fumen-prompt");
 
+const FUMEN_SVG_SERVER = "https://fumen-svg-server.pages.dev/";
+
 const args = neodoc.run(`
 Usage:
   sfinder-minimal <path>
@@ -154,7 +156,7 @@ ${[...sol.patterns].join(",")}
 }
 
 function fumenImage(fumen) {
-  return `![fumen image](https://fumen-svg-server--eight041.repl.co/?delay=1500&data=${encodeURIComponent(fumen)})`;
+  return `![fumen image](${FUMEN_SVG_SERVER}?delay=1500&data=${encodeURIComponent(fumen)})`;
 }
 
 function fumenLink(fumen) {
